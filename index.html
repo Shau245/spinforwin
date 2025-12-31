@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NovaCoders Jr | New Year Spin & Win 2026</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Fredoka', sans-serif;
+  background: linear-gradient(180deg, #0d0d0d, #0d47a1);
+  text-align: center;
+  overflow: hidden;
+  color: white;
+  position: relative;
+}
+
+/* New Year Animated Text */
+#newYear {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 48px;
+  margin-top: 20px;
+  text-shadow: 2px 2px #ffcc00, 4px 4px #ff4444;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  0% { text-shadow: 2px 2px #ffcc00, 4px 4px #ff4444; color: #fff; transform: scale(1); }
+  50% { text-shadow: 2px 2px #fff, 4px 4px #ff0; color: #ff0; transform: scale(1.1); }
+  100% { text-shadow: 2px 2px #ffcc00, 4px 4px #ff4444; color: #fff; transform: scale(1); }
+}
+
+.brand {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 42px;
+  margin-top: 10px;
+  text-shadow: 2px 2px #ff4d4d;
+  animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+
+.tagline {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+#wheel-container {
+  position: relative;
+  margin: 30px auto;
+  width: 360px;
+  height: 360px;
+}
+
+#pointer {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 35px solid red;
+  z-index: 10;
+  animation: pointerGlow 0.8s infinite alternate;
+}
+
+@keyframes pointerGlow {
+  0% { transform: translateX(-50%) translateY(0); filter: drop-shadow(0 0 5px red); }
+  100% { transform: translateX(-50%) translateY(-10px); filter: drop-shadow(0 0 15px yellow); }
+}
+
+canvas {
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff, #f0f0f0);
+  box-shadow: 0 0 50px rgba(255,255,255,0.3);
+  transition: transform 0.2s;
+}
+
+canvas:active {
+  transform: scale(0.97);
+}
+
+input {
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 30px;
+  border: none;
+  width: 260px;
+  text-align: center;
+}
+
+button {
+  margin-top: 20px;
+  padding: 16px 40px;
+  font-size: 22px;
+  border-radius: 40px;
+  border: none;
+  background: linear-gradient(45deg,#ff4d4d,#ff8c00);
+  color: white;
+  font-family: 'Luckiest Guy', cursive;
+  cursor: pointer;
+  box-shadow: 0 6px #c0392b;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px #c0392b;
+}
+
+button:disabled {
+  background: gray;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+#resultOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#resultCard {
+  background: white;
+  color: black;
+  padding: 30px;
+  width: 380px;
+  border-radius: 30px;
+  text-align: center;
+  animation: pop 0.5s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+#resultCard h2 {
+  font-family: 'Luckiest Guy', cursive;
+  color: #ff4d4d;
+  font-size: 32px;
+}
+
+/* Falling stars background animation */
+.star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: yellow;
+  border-radius: 50%;
+  animation: fall linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes fall {
+  0% { transform: translateY(0) translateX(0); opacity:1; }
+  100% { transform: translateY(800px) translateX(50px); opacity:0; }
+}
+
+</style>
+</head>
+<body>
+
+<div id="newYear">🎉 Happy New Year 2026! 🎆</div>
+<div class="brand">NovaCoders Jr &lt;&gt;</div>
+<div class="tagline">Play • Learn • Win Coding Rewards 🚀</div>
+
+<div id="wheel-container">
+  <div id="pointer"></div>
+  <canvas id="wheel" width="360" height="360"></canvas>
+</div>
+
+<input id="studentName" placeholder="Enter your name"><br>
+<button id="spinBtn">SPIN NOW</button>
+
+<div id="resultOverlay">
+  <div id="resultCard">
+    <h2>🎊 Congratulations 🎊</h2>
+    <p id="winnerText"></p>
+    <p><b id="prizeText"></b></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+// ----- Falling stars -----
+for(let i=0;i<50;i++){
+  const star = document.createElement("div");
+  star.className="star";
+  star.style.left = Math.random()*window.innerWidth+"px";
+  star.style.animationDuration = 2+Math.random()*3+"s";
+  star.style.width = star.style.height = (2+Math.random()*3)+"px";
+  document.body.appendChild(star);
+}
+
+// ----- Prizes -----
+const prizes = [
+  "🎮 Free Demo Class",
+  "💰 ₹500 Scholarship",
+  "🖥 1 Week Free Coding",
+  "🤖 AI Intro Class",
+  "🎁 Merchandise & Goodies",
+  "🏷 50% OFF Total Course",
+  "💵 ₹1000 Scholarship",
+  "😅 Better Luck Next Time"
+];
+
+// Canvas setup
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const center = canvas.width / 2;
+const radius = center - 10;
+const slice = 2 * Math.PI / prizes.length;
+
+let angle = 0;
+let spinning = false;
+
+// Draw Wheel
+function drawWheel() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  for(let i=0;i<prizes.length;i++){
+    const start = i*slice + angle;
+    const end = (i+1)*slice + angle;
+
+    const grad = ctx.createLinearGradient(0,0,360,360);
+    grad.addColorStop(0, i%2===0?"#FFD700":"#FFB84D");
+    grad.addColorStop(1, i%2===0?"#FF8C00":"#FFE066");
+
+    ctx.beginPath();
+    ctx.moveTo(center,center);
+    ctx.arc(center,center,radius,start,end);
+    ctx.fillStyle=grad;
+    ctx.fill();
+    ctx.closePath();
+
+    // Text rotated inside slice
+    ctx.save();
+    ctx.translate(center,center);
+    ctx.rotate(start + slice/2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 12px Fredoka"; // smaller font to fit
+    wrapText(ctx, prizes[i], radius-10, 0, 70, 14);
+    ctx.restore();
+  }
+}
+drawWheel();
+
+// Wrap text to fit
+function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '';
+  let lines = [];
+  for(let n=0;n<words.length;n++){
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if(metrics.width > maxWidth && n>0){
+      lines.push(line);
+      line = words[n]+" ";
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+  for(let i=0;i<lines.length;i++){
+    ctx.fillText(lines[i], x, y + (i*lineHeight));
+  }
+}
+
+// Spin function
+document.getElementById("spinBtn").addEventListener("click",spinWheel);
+
+function spinWheel(){
+  if(spinning) return;
+  const name = document.getElementById("studentName").value.trim();
+  if(!name) return alert("Please enter your name!");
+
+  spinning=true;
+  document.getElementById("spinBtn").disabled=true;
+
+  const randomIndex = Math.floor(Math.random()*prizes.length);
+  const rotations = 6;
+  const finalAngle = rotations*2*Math.PI + randomIndex*slice + slice/2;
+
+  const startAngle = angle;
+  const duration=4500;
+  let startTime=null;
+
+  function animate(time){
+    if(!startTime) startTime=time;
+    const progress = Math.min((time-startTime)/duration,1);
+    angle = startAngle + (finalAngle - startAngle)*easeOut(progress);
+    drawWheel();
+    if(progress<1){
+      requestAnimationFrame(animate);
+    } else {
+      finishSpin(name,randomIndex);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function easeOut(t){ return 1-Math.pow(1-t,3); }
+
+function finishSpin(name,index){
+  document.getElementById("winnerText").innerHTML=`<b>${name}</b>, you won`;
+  document.getElementById("prizeText").innerHTML=prizes[index];
+  document.getElementById("resultOverlay").style.display="flex";
+
+  // Confetti and fireworks
+  for(let i=0;i<5;i++){
+    confetti({particleCount:100,spread:160,origin:{y:Math.random()*0.5},colors:['#ff0','#ff4d4d','#00ffff','#ff8c00']});
+  }
+
+  spinning=false;
+}
+</script>
+</body>
+</html>
